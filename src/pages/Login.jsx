@@ -3,21 +3,25 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase-config";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import LoadingButton from "../components/LoadingButton";
 
 function Login() {
   const navigate = useNavigate("/");
   const [error, setError] = React.useState({});
   const [loginEmail, setLoginEmail] = React.useState("");
   const [loginPassword, setLoginPassword] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
   const login = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
       toast.success("You have been logged in successfully");
       navigate("/");
     } catch (err) {
-      console.log(err.message);
-      setError(err);
+      setError({ message: "Invalid credentials" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,6 +38,7 @@ function Login() {
             onChange={(event) => {
               setLoginEmail(event.target.value);
             }}
+            required
           />
           <input
             placeholder="Password..."
@@ -41,9 +46,12 @@ function Login() {
             onChange={(event) => {
               setLoginPassword(event.target.value);
             }}
+            required
           />
-
-          <button className="w-100 btn btn-primary"> Login</button>
+          <LoadingButton loading={loading} className="w-100 btn btn-primary">
+            {" "}
+            Login
+          </LoadingButton>
         </form>
       </div>
     </div>

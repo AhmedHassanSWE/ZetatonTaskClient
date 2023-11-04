@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React from "react";
 import axios from "axios";
 import EditPost from "./EditPost";
@@ -15,18 +16,19 @@ const PostsList = () => {
   const [showAdd, setShowAdd] = React.useState(false);
   const [showEdit, setShowEdit] = React.useState(false);
 
-  React.useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/posts");
-        setPosts(response.data);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
-    if (axios.defaults.headers.common["Authorization"]) {
-      fetchPosts();
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/posts", {
+        headers: { Authorization: `Bearer ${user?.accessToken}` },
+      });
+      setPosts(response.data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
     }
+  };
+
+  React.useEffect(() => {
+    fetchPosts();
   }, []);
 
   const handleEditClick = (post) => {
@@ -77,7 +79,6 @@ const PostsList = () => {
                   <button className="btn btn-danger m-1" onClick={() => handleDelete(post?.id, post.userId)}>
                     Delete
                   </button>
-                  {/* <EditPost post={post} onEdit={() => {}} /> */}
                 </div>
               )}
             </div>

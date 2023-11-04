@@ -3,21 +3,31 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase-config";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import LoadingButton from "../components/LoadingButton";
 
 function Signup() {
   const navigate = useNavigate();
   const [error, setError] = React.useState({});
   const [registerEmail, setRegisterEmail] = React.useState("");
   const [registerPassword, setRegisterPassword] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
   const register = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       await createUserWithEmailAndPassword(auth, registerEmail, registerPassword);
       toast.success("Account has been created successfully");
       navigate("/");
     } catch (err) {
-      console.log(err.message);
+      if (err.message === "Firebase: Error (auth/email-already-in-use).") {
+        return setError({ message: "Email has been used before" });
+      }
+      if (err.message === "Firebase: Password should be at least 6 characters (auth/weak-password).") {
+        return setError({ message: "Password should be at least 6 characters" });
+      }
       setError(err);
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -32,6 +42,7 @@ function Signup() {
           onChange={(event) => {
             setRegisterEmail(event.target.value);
           }}
+          required
         />
         <input
           placeholder="Password..."
@@ -39,8 +50,11 @@ function Signup() {
           onChange={(event) => {
             setRegisterPassword(event.target.value);
           }}
+          required
         />
-        <button className="w-100 btn btn-primary">Sign Up</button>
+        <LoadingButton loading={loading} className="w-100 btn btn-primary">
+          Sign Up
+        </LoadingButton>
       </form>
     </div>
   );

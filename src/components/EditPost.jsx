@@ -2,31 +2,34 @@ import React from "react";
 import axios from "axios";
 import { analytics } from "../firebase-config";
 import { logEvent } from "firebase/analytics";
+import LoadingButton from "./LoadingButton";
 
 const EditPost = ({ post, setShow, setPosts }) => {
-  const [title, setTitle] = React.useState(post.title);
-  const [content, setContent] = React.useState(post.content);
-  const [imageUrl, setImageUrl] = React.useState(post.imageUrl);
+  const [inputs, setInputs] = React.useState({ title: post.title, content: post.content, imageUrl: post.imageUrl });
+  const [err, setErr] = React.useState({});
+  const [loading, setLoading] = React.useState(false);
+
+  const handleChange = (e) => {
+    setInputs((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
+  };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      const newPosts = await axios.put(`http://localhost:8080/posts/${post.id}`, {
-        title,
-        content,
-        imageUrl,
-      });
+      setLoading(true);
+      const newPosts = await axios.put(`http://localhost:8080/posts/${post.id}`, inputs);
       logEvent(analytics, "Post_edited");
       setPosts(newPosts.data);
       setShow(false);
     } catch (error) {
-      console.error("Error updating post:", error);
+      setErr(error.response.data);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div>
-      <h2>Edit Post</h2>
       <form onSubmit={handleUpdate}>
         <div className="mb-3">
           <label htmlFor="title" className="form-label">
@@ -36,9 +39,11 @@ const EditPost = ({ post, setShow, setPosts }) => {
             type="text"
             className="form-control"
             id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            name="title"
+            value={inputs.title}
+            onChange={handleChange}
           />
+          {err?.errors?.title && <div className="error-message">{err?.errors?.title}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="content" className="form-label">
@@ -47,9 +52,11 @@ const EditPost = ({ post, setShow, setPosts }) => {
           <textarea
             className="form-control"
             id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            name="content"
+            value={inputs.content}
+            onChange={handleChange}
           />
+          {err?.errors?.content && <div className="error-message">{err?.errors?.content}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="imageUrl" className="form-label">
@@ -59,13 +66,15 @@ const EditPost = ({ post, setShow, setPosts }) => {
             type="text"
             className="form-control"
             id="imageUrl"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
+            name="imageUrl"
+            value={inputs.imageUrl}
+            onChange={handleChange}
           />
+          {err?.errors?.imageUrl && <div className="error-message">{err?.errors?.imageUrl}</div>}
         </div>
-        <button type="submit" className="btn btn-primary">
+        <LoadingButton loading={loading} type="submit" className="btn btn-primary w-100">
           Update Post
-        </button>
+        </LoadingButton>
       </form>
     </div>
   );
