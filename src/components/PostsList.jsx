@@ -18,7 +18,7 @@ const PostsList = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/posts", {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BASE_URL}/posts`, {
         headers: { Authorization: `Bearer ${user?.accessToken}` },
       });
       setPosts(response.data);
@@ -39,7 +39,7 @@ const PostsList = () => {
   const handleDelete = async (id, postUserId) => {
     if (postUserId === user?.uid) {
       try {
-        const response = await axios.delete(`http://localhost:8080/posts/${id}`);
+        const response = await axios.delete(`${import.meta.env.VITE_REACT_APP_BASE_URL}/posts/${id}`);
         setPosts(response.data);
         logEvent(analytics, "Post_deleted");
       } catch (error) {
@@ -66,27 +66,31 @@ const PostsList = () => {
         </button>
       </div>
       <hr className="mb-4" />
-      <ul className="list-group">
-        {posts.map((post) => (
-          <li key={post?.id} className="list-group-item mb-4">
-            <div className="flex-between">
-              <h3>{post.title}</h3>
-              {post.userId === user?.uid && (
-                <div>
-                  <button className="btn btn-primary m-1" onClick={() => handleEditClick(post)}>
-                    Edit
-                  </button>
-                  <button className="btn btn-danger m-1" onClick={() => handleDelete(post?.id, post.userId)}>
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
-            <p>{post.content}</p>
-            <img className="mt-2 w-50" src={post.imageUrl} />
-          </li>
-        ))}
-      </ul>
+      {posts.length === 0 ? (
+        <h2 className="text-center">NO POSTS ADDED</h2>
+      ) : (
+        <ul className="list-group">
+          {posts.map((post) => (
+            <li key={post?.id} className="list-group-item mb-4">
+              <div className="flex-between">
+                <h3>{post.title}</h3>
+                {post.userId === user?.uid && (
+                  <div>
+                    <button className="btn btn-primary m-1" onClick={() => handleEditClick(post)}>
+                      Edit
+                    </button>
+                    <button className="btn btn-danger m-1" onClick={() => handleDelete(post?.id, post.userId)}>
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+              <p>{post.content}</p>
+              <img className="mt-2 w-50" src={post.imageUrl} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

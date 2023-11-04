@@ -17,7 +17,7 @@ const EditPost = ({ post, setShow, setPosts }) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const newPosts = await axios.put(`http://localhost:8080/posts/${post.id}`, inputs);
+      const newPosts = await axios.put(`${import.meta.env.VITE_REACT_APP_BASE_URL}/posts/${post.id}`, inputs);
       logEvent(analytics, "Post_edited");
       setPosts(newPosts.data);
       setShow(false);

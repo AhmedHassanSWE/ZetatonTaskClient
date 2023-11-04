@@ -17,7 +17,7 @@ const AddPost = ({ setShow, setPosts }) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const newPosts = await axios.post("http://localhost:8080/posts", inputs);
+      const newPosts = await axios.post(`${import.meta.env.VITE_REACT_APP_BASE_URL}/posts`, inputs);
       logEvent(analytics, "Post_added");
       setPosts(newPosts.data);
       setShow(false);
